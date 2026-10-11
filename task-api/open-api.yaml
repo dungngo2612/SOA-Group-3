@@ -1,0 +1,72 @@
+
+openapi: 3.0.3
+
+info:
+  title: Book Management API
+  description: API quản lý sách của nhóm 3
+  version: 1.0.0
+
+servers:
+  - url: http://127.0.0.1:5000
+    description: Local development server
+
+tags:
+  - name: Books
+    description: Các thao tác quản lý sách
+
+paths:
+  /books:
+    get:
+      tags:
+        - Books
+      summary: Lấy danh sách sách
+      responses:
+        "200":
+          description: Lấy danh sách sách thành công
+
+    post:
+      tags:
+        - Books
+      summary: Thêm sách mới
+      responses:
+        "201":
+          description: Thêm sách thành công
+
+  /books/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Mã sách
+        schema:
+          type: integer
+
+    get:
+      tags:
+        - Books
+      summary: Lấy thông tin một cuốn sách
+      responses:
+        "200":
+          description: Lấy sách thành công
+        "404":
+          description: Không tìm thấy sách
+
+    put:
+      tags:
+        - Books
+      summary: Cập nhật thông tin sách
+      responses:
+        "200":
+          description: Cập nhật thành công
+        "404":
+          description: Không tìm thấy sách
+
+    delete:
+      tags:
+        - Books
+      summary: Xóa sách
+      responses:
+        "204":
+          description: Xóa sách thành công
+        "404":
+          description: Không tìm thấy sách
