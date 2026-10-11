@@ -7,6 +7,15 @@ BOOKS = {}
 _NEXT_ID = 1
 
 
+def _build_book(book_id, data):
+    return {
+        "id": book_id,
+        "title": data["title"].strip(),
+        "author": data["author"].strip(),
+        "published_year": data["published_year"],
+    }
+
+
 def list_books():
     """Return all books ordered by ID."""
     return [BOOKS[key].copy() for key in sorted(BOOKS)]
@@ -22,12 +31,7 @@ def create_book(data):
     """Create a book and assign its ID on the server."""
     global _NEXT_ID
 
-    book = {
-        "id": _NEXT_ID,
-        "title": data["title"].strip(),
-        "author": data["author"].strip(),
-        "published_year": data["published_year"],
-    }
+    book = _build_book(_NEXT_ID, data)
     BOOKS[_NEXT_ID] = book
     _NEXT_ID += 1
     return book.copy()
@@ -38,12 +42,7 @@ def update_book(book_id, data):
     if book_id not in BOOKS:
         return None
 
-    BOOKS[book_id] = {
-        "id": book_id,
-        "title": data["title"].strip(),
-        "author": data["author"].strip(),
-        "published_year": data["published_year"],
-    }
+    BOOKS[book_id] = _build_book(book_id, data)
     return BOOKS[book_id].copy()
 
 
