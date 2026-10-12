@@ -16,7 +16,7 @@ def client():
 def sample_book():
     return {
         "title": "Clean Code",
-        "author": "Robert C. Martin",
+        "author": "zzzzz",
         "published_year": 2008,
     }
 
@@ -48,14 +48,14 @@ def test_create_requires_all_fields(client):
 def test_update_book(client):
     client.post("/books", json=sample_book())
     updated = {
-        "title": "Clean Code - Second Edition",
-        "author": "Robert C. Martin",
+        "title": "Clean Code2",
+        "author": "zzzzz",
         "published_year": 2009,
     }
 
     response = client.put("/books/1", json=updated)
     assert response.status_code == 200
-    assert response.get_json()["title"] == "Clean Code - Second Edition"
+    assert response.get_json()["title"] == "Clean Code2"
 
 
 def test_delete_book(client):
