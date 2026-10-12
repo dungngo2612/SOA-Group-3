@@ -1,264 +1,106 @@
 openapi: 3.0.3
 info:
-  title: Book Management API
-  version: 1.0.0
+  title: Library Management API
+  version: 1.1.0
   description: >
-    API mẫu quản lý sách. Đặc tả này mô tả contract giữa client và server.
-    Backend mẫu được triển khai bằng Flask.
+    API quản lý sách, tác giả và phiếu mượn. Đặc tả phản ánh các endpoint
+    hiện có của backend Flask. Backend hiện chưa triển khai xác thực hoặc
+    phân quyền.
 servers:
   - url: http://127.0.0.1:5000
-    description: Local development server
-
+    description: Máy chủ phát triển cục bộ; thay bằng URL triển khai khi phát hành.
+security: []
 tags:
+  - name: System
+    description: Thông tin chung của API.
   - name: Books
-    description: Các thao tác quản lý sách
+    description: Các thao tác quản lý sách.
+  - name: Authors
+    description: Các thao tác quản lý tác giả.
+  - name: Borrows
+    description: Các thao tác quản lý phiếu mượn.
 
 paths:
-  /books:
+  /:
     get:
-      tags: [Books]
-      summary: Lấy danh sách sách
-      operationId: listBooks
+      tags: [System]
+      summary: Kiểm tra API
+      operationId: getApiInfo
       responses:
         '200':
-          description: Lấy danh sách thành công
+          description: API đang phản hồi.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BookList'
+                $ref: '#/components/schemas/ApiInfo'
               example:
-                data:
-                  - id: 1
-                    title: Clean Code
-                    author: Robert C. Martin
-                    published_year: 2008
-                total: 1
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-    post:
-      tags: [Books]
-      summary: Tạo sách mới
-      operationId: createBook
-      requestBody:
-        required: true
-        description: Thông tin sách mới; ID do server tự cấp.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BookCreate'
-            example:
-              title: Clean Code
-              author: Robert C. Martin
-              published_year: 2008
-      responses:
-        '201':
-          description: Tạo sách thành công
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Book'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '415':
-          description: Content-Type không phải application/json
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
+                message: Book Management API
+                books_endpoint: /books
+  /books:
+    $ref: './paths/books.yaml#/books'
   /books/{id}:
-    parameters:
-      - $ref: '#/components/parameters/BookId'
-
-    get:
-      tags: [Books]
-      summary: Lấy thông tin một cuốn sách
-      operationId: getBook
-      responses:
-        '200':
-          description: Tìm thấy sách
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Book'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
-    put:
-      tags: [Books]
-      summary: Cập nhật toàn bộ thông tin có thể sửa của sách
-      description: PUT yêu cầu gửi đủ title, author và published_year.
-      operationId: updateBook
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BookUpdate'
-            example:
-              title: Clean Code - Second Edition
-              author: Robert C. Martin
-              published_year: 2009
-      responses:
-        '200':
-          description: Cập nhật thành công
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Book'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '415':
-          description: Content-Type không phải application/json
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-    delete:
-      tags: [Books]
-      summary: Xóa sách
-      operationId: deleteBook
-      responses:
-        '204':
-          description: Xóa thành công; không có response body
-        '404':
-          $ref: '#/components/responses/NotFound'
+    $ref: './paths/books.yaml#/book_by_id'
+  /authors:
+    $ref: './paths/authors.yaml#/authors'
+  /authors/{author_id}:
+    $ref: './paths/authors.yaml#/author_by_id'
+  /borrows:
+    $ref: './paths/borrows.yaml#/borrows'
+  /borrows/{borrow_id}:
+    $ref: './paths/borrows.yaml#/borrow_by_id'
 
 components:
   parameters:
     BookId:
-      name: id
-      in: path
-      required: true
-      description: ID của sách cần thao tác
-      schema:
-        type: integer
-        minimum: 1
-      example: 1
-
-  schemas:
-    Book:
-      type: object
-      description: Thông tin đầy đủ của một cuốn sách.
-      required:
-        - id
-        - title
-        - author
-        - published_year
-      properties:
-        id:
-          type: integer
-          readOnly: true
-          example: 1
-        title:
-          type: string
-          minLength: 1
-          example: Clean Code
-        author:
-          type: string
-          minLength: 1
-          example: Robert C. Martin
-        published_year:
-          type: integer
-          minimum: 0
-          example: 2008
-
+      $ref: './components/parameters.yaml#/BookId'
+    AuthorId:
+      $ref: './components/parameters.yaml#/AuthorId'
+    BorrowId:
+      $ref: './components/parameters.yaml#/BorrowId'
+  requestBodies:
     BookCreate:
-      type: object
-      description: Dữ liệu client gửi để tạo sách; không gồm id.
-      required:
-        - title
-        - author
-        - published_year
-      properties:
-        title:
-          type: string
-          minLength: 1
-          example: Clean Code
-        author:
-          type: string
-          minLength: 1
-          example: Robert C. Martin
-        published_year:
-          type: integer
-          minimum: 0
-          example: 2008
-      additionalProperties: false
-
+      $ref: './components/request-bodies.yaml#/BookCreate'
     BookUpdate:
-      type: object
-      description: Dữ liệu thay thế các trường có thể sửa khi gọi PUT.
-      required:
-        - title
-        - author
-        - published_year
-      properties:
-        title:
-          type: string
-          minLength: 1
-          example: Clean Code - Second Edition
-        author:
-          type: string
-          minLength: 1
-          example: Robert C. Martin
-        published_year:
-          type: integer
-          minimum: 0
-          example: 2009
-      additionalProperties: false
-
-    BookList:
-      type: object
-      required:
-        - data
-        - total
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Book'
-        total:
-          type: integer
-          minimum: 0
-          example: 1
-
-    Error:
-      type: object
-      required:
-        - error
-      properties:
-        error:
-          type: string
-          example: Book not found
-
+      $ref: './components/request-bodies.yaml#/BookUpdate'
+    AuthorWrite:
+      $ref: './components/request-bodies.yaml#/AuthorWrite'
+    BorrowWrite:
+      $ref: './components/request-bodies.yaml#/BorrowWrite'
   responses:
     BadRequest:
-      description: Request body không hợp lệ hoặc thiếu trường bắt buộc
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error: "Missing required field(s): title, author, published_year"
-
+      $ref: './components/responses.yaml#/BadRequest'
+    UnsupportedMediaType:
+      $ref: './components/responses.yaml#/UnsupportedMediaType'
     NotFound:
-      description: Không tìm thấy sách theo ID đã cung cấp
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error: Book not found
-
+      $ref: './components/responses.yaml#/NotFound'
+    AuthorNotFound:
+      $ref: './components/responses.yaml#/AuthorNotFound'
+    BorrowNotFound:
+      $ref: './components/responses.yaml#/BorrowNotFound'
     InternalServerError:
-      description: Lỗi không mong muốn từ server
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error: Internal server error
+      $ref: './components/responses.yaml#/InternalServerError'
+  schemas:
+    ApiInfo:
+      $ref: './components/schemas.yaml#/ApiInfo'
+    Book:
+      $ref: './components/schemas.yaml#/Book'
+    BookCreate:
+      $ref: './components/schemas.yaml#/BookCreate'
+    BookUpdate:
+      $ref: './components/schemas.yaml#/BookUpdate'
+    BookList:
+      $ref: './components/schemas.yaml#/BookList'
+    Author:
+      $ref: './components/schemas.yaml#/Author'
+    AuthorWrite:
+      $ref: './components/schemas.yaml#/AuthorWrite'
+    AuthorList:
+      $ref: './components/schemas.yaml#/AuthorList'
+    Borrow:
+      $ref: './components/schemas.yaml#/Borrow'
+    BorrowWrite:
+      $ref: './components/schemas.yaml#/BorrowWrite'
+    BorrowList:
+      $ref: './components/schemas.yaml#/BorrowList'
+    Error:
+      $ref: './components/schemas.yaml#/Error'
